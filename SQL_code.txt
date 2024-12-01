@@ -1,0 +1,234 @@
+Task 1:
+    1.1. Create table authors
+        USE librarymanagement;
+        
+        CREATE TABLE authors (
+            author_id INT AUTO_INCREMENT PRIMARY KEY,
+            author_name VARCHAR(255)
+        );
+
+   1.2. Create table genres
+        USE librarymanagement;
+        
+        CREATE TABLE genres (
+            genre_id INT AUTO_INCREMENT PRIMARY KEY,
+            genre_name VARCHAR(255)
+        );
+
+   1.3. Create table books
+        USE librarymanagement;
+        
+        CREATE TABLE books (
+            book_id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255),
+            publication_year YEAR,
+            author_id INT,
+            genre_id INT,
+            FOREIGN KEY (author_id) REFERENCES authors(author_id),
+            FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
+        );
+
+   1.4. Create table users
+        USE librarymanagement;
+        
+        CREATE TABLE users (
+            user_id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255),
+            email VARCHAR(255)
+        );
+
+   1.5. Create table borrowed_book
+        USE librarymanagement;
+        
+        CREATE TABLE borrowed_book (
+            borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+            book_id INT,
+            user_id INT,
+            borrow_date DATE,
+            return_date DATE,
+            FOREIGN KEY (book_id) REFERENCES books(book_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        );
+
+----------------------------------------------------------------------------------
+
+Task 2:
+    2.1. INSERT INTO authors
+        USE librarymanagement;
+
+        INSERT INTO authors (author_name)
+        VALUES
+            ('Francis Scott Fitzgerald'),
+            ('Harper Lee');
+
+    2.2. INSERT INTO books
+            USE librarymanagement;
+
+            INSERT INTO books (title, publication_year) 
+            VALUES 
+                ('The Great Gatsby', 1925, 1, 1),
+                ('To Kill a Mockingbird', 1960, 2, 1);
+
+    2.3. INSERT INTO genres
+            USE librarymanagement;
+
+            INSERT INTO genres (genre_name) 
+            VALUES 
+                ('Novel');
+
+    2.4. INSERT INTO users
+            USE librarymanagement;
+
+            INSERT INTO users (username, email) 
+            VALUES 
+                ('Gary Thruman', 'gary.thruman@gmail.com'),
+                ('Eddy White', 'eddy.white@gmail.com');
+
+   2.5. INSERT INTO borrowed_book
+            USE librarymanagement;
+
+            INSERT INTO borrowed_book (book_id, user_id, borrow_date, return_date)
+            VALUES 
+                (1, 1, '2024-10-26', '2024-11-05'),
+                (2, 1, '2024-11-05', '2024-11-30'),
+                (2, 2, '2024-11-02', '2024-12-01');
+
+------------------------------------------------------------------------------------
+
+Task 3:
+    USE mydb;
+
+    SELECT 
+        o.*,
+        c.*,
+        e.*,
+        sh.*,
+        od.*, 
+        p.*,
+        cat.*,
+        s.*
+    FROM orders o
+    INNER JOIN customers c ON o.customer_id = c.id
+    INNER JOIN employees e ON o.employee_id = e.employee_id
+    INNER JOIN shippers sh ON o.shipper_id = sh.id
+    INNER JOIN order_details od ON o.id = od.order_id 
+    INNER JOIN products p ON od.product_id = p.id
+    INNER JOIN categories cat ON p.category_id = cat.id
+    INNER JOIN suppliers s ON p.supplier_id = s.id;
+
+------------------------------------------------------------------------------------
+
+Task 4:
+    4.1. Aggregation with COUNT
+        USE mydb;
+
+        SELECT COUNT(*) 
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id;
+
+    4.2. Change INNER to LEFT and RIGHT JOIN
+        USE mydb;
+
+        SELECT COUNT(*) 
+        FROM orders o
+        LEFT JOIN customers c ON o.customer_id = c.id
+        LEFT JOIN employees e ON o.employee_id = e.employee_id
+        LEFT JOIN shippers sh ON o.shipper_id = sh.id
+        LEFT JOIN order_details od ON o.id = od.order_id 
+        LEFT JOIN products p ON od.product_id = p.id
+        LEFT JOIN categories cat ON p.category_id = cat.id
+        RIGHT JOIN suppliers s ON p.supplier_id = s.id;
+
+        Пояснення. Після зміни INNER на LEFT and RIGHT JOIN, ми отримали той самий результат (518 рядків без NULL), 
+        це означає, що всі записи, які є в лівих таблицях (наприклад, order_details, orders, і т.д.), насправді
+        мають відповідні записи в правих таблицях (наприклад, customers, products, і т.д.). У результаті цього
+        жодне поле не заповнюється значенням NULL. Тобто, у нашому випадку не виникло ситуацій, де б для одного
+        з полів не було відповідного запису в іншій таблиці. Це може траплятися, якщо дані цілісні і всі замовлення
+        мають відповідні записи у всіх інших таблицях.
+
+    4.3. Select employee_id > 3 та ≤ 10
+        USE mydb;
+
+        SELECT COUNT(*) 
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        WHERE e.employee_id > 3 and e.employee_id <= 10;
+
+    4.4. Group by categories name, COUNT & AVG
+        USE mydb;
+
+        SELECT cat.name, COUNT(*), AVG(od.quantity) 
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        WHERE e.employee_id > 3 and e.employee_id <= 10
+        GROUP BY cat.name;
+
+    4.5. Filter raws with AVG(od.quantity) > 21
+        USE mydb;
+
+        SELECT cat.name, COUNT(*), AVG(od.quantity)
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        WHERE e.employee_id > 3 and e.employee_id <= 10
+        GROUP BY cat.name
+        HAVING AVG(od.quantity) > 21;
+
+    4.6. Sort rows in descending order
+        USE mydb;
+
+        SELECT cat.name, COUNT(*), AVG(od.quantity)
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        WHERE e.employee_id > 3 and e.employee_id <= 10
+        GROUP BY cat.name
+        HAVING AVG(od.quantity) > 21
+        ORDER BY COUNT(*) DESC;
+
+    4.7. Limit and Offset
+        USE mydb;
+        
+        SELECT cat.name, COUNT(*), AVG(od.quantity)
+        FROM orders o
+        INNER JOIN customers c ON o.customer_id = c.id
+        INNER JOIN employees e ON o.employee_id = e.employee_id
+        INNER JOIN shippers sh ON o.shipper_id = sh.id
+        INNER JOIN order_details od ON o.id = od.order_id 
+        INNER JOIN products p ON od.product_id = p.id
+        INNER JOIN categories cat ON p.category_id = cat.id
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        WHERE e.employee_id > 3 and e.employee_id <= 10
+        GROUP BY cat.name
+        HAVING AVG(od.quantity) > 21
+        ORDER BY COUNT(*) DESC
+        LIMIT 4
+        OFFSET 1;    
